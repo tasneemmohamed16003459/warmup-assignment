@@ -17,13 +17,15 @@ function formatTime(seconds, format = 'hh') {
     let hours = Math.floor(seconds / 3600);
     let mins = Math.floor((seconds % 3600) / 60);
     let secs = seconds % 60;
-    
+
+    // For h format, with leading zeros for 1 digit
     if (format === 'h') {
         return `${hours}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
     } else if (format === 'hhh') {
-        // For hhh format, we want exactly as is - with leading zeros for 3 digits
+        // For hhh format, with leading zeros for 3 digits
         return `${String(hours).padStart(3,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
     } else {
+        // For hh format, with leading zeros for 2 digits
         return `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
     }
 }
@@ -63,7 +65,22 @@ function getShiftDuration(startTime, endTime) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getIdleTime(startTime, endTime) {
-    // TODO: Implement this function
+  let s = toSeconds(start);
+    let e = toSeconds(end);
+    if (e < s) e += 24*3600;
+    
+    let idle = 0;
+    let current = s;
+    
+    while (current < e) {
+        let hour = (current % 86400) / 3600;
+        if (hour < 8 || hour >= 22) {
+            idle++;
+        }
+        current++;
+    }
+    
+    return formatHH(idle);
 }
 
 // ============================================================
