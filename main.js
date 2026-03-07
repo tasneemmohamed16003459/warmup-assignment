@@ -17,24 +17,17 @@ function formatTime(seconds, format = 'hh') {
     let hours = Math.floor(seconds / 3600);
     let mins = Math.floor((seconds % 3600) / 60);
     let secs = seconds % 60;
-
-    // For h format, with leading zeros for 1 digit
+    
+    let hoursStr;
     if (format === 'h') {
-        return `${hours}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+        hoursStr = String(hours); // no leading zeros
     } else if (format === 'hhh') {
-        // For hhh format, with leading zeros for 3 digits
-        return `${String(hours).padStart(3,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+        hoursStr = String(hours).padStart(3, '0'); // 3 digits with leading zeros
     } else {
-        // For hh format, with leading zeros for 2 digits
-        return `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+        hoursStr = String(hours).padStart(2, '0'); // 2 digits with leading zeros
     }
-}
-
-function formatHH(seconds) {
-    let hours = Math.floor(seconds / 3600);
-    let mins = Math.floor((seconds % 3600) / 60);
-    let secs = seconds % 60;
-    return `${hours}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    
+    return `${hoursStr}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
 }
 
 function isEid(date) {
@@ -55,7 +48,7 @@ function getShiftDuration(startTime, endTime) {
     let s = toSeconds(start);
     let e = toSeconds(end);
     if (e < s) e += 24*3600;
-    return formatHH(e - s);
+    return formatTime(e - s, 'h');
 }
 
 // ============================================================
@@ -80,7 +73,7 @@ function getIdleTime(startTime, endTime) {
         current++;
     }
     
-    return formatHH(idle);
+    return formatTime(idle, 'h');
 }
 
 // ============================================================
@@ -90,7 +83,8 @@ function getIdleTime(startTime, endTime) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getActiveTime(shiftDuration, idleTime) {
-    // TODO: Implement this function
+    let active = Math.max(0, durationToSec(shift) - durationToSec(idle));
+    return formatTime(active, 'h');
 }
 
 // ============================================================
@@ -100,7 +94,8 @@ function getActiveTime(shiftDuration, idleTime) {
 // Returns: boolean
 // ============================================================
 function metQuota(date, activeTime) {
-    // TODO: Implement this function
+   let quota = isEid(date) ? 6*3600 : 8*3600 + 24*60;
+    return durationToSec(active) >= quota;
 }
 
 // ============================================================
