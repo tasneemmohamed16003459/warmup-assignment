@@ -48,8 +48,7 @@ function getShiftDuration(startTime, endTime) {
     let s = toSeconds(startTime);
     let e = toSeconds(endTime);
     if (e < s) e += 24*3600;
-    return formatTime(e - s, 'h');
-}
+    return formatTime(e - s, 'h'); }
 
 // ============================================================
 // Function 2: getIdleTime(startTime, endTime)
@@ -232,8 +231,7 @@ function getTotalActiveHoursPerMonth(textFile, driverID, month) {
         
         return formatTime(total, 'h');
     } catch (e) {
-        return "0:00:00";
-    }
+        return "0:00:00"; }
 }
 
 // ============================================================
@@ -249,7 +247,6 @@ function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, mont
     try {
         let m = String(month).padStart(2, '0');
         
-        // Get driver's day off from rate file
         let rateContent = fs.readFileSync(rateFile, 'utf8');
         let rateLines = rateContent.trim().split('\n');
         
@@ -275,8 +272,7 @@ function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, mont
             if (parts[0] === driverID && parts[2].substring(5,7) === m) {
                 let date = parts[2];
                 if (getDayOfWeek(date) !== dayOff) {
-                    totalSeconds += isEid(date) ? 6 * 3600 : 8 * 3600 + 24 * 60;
-                }
+                    totalSeconds += isEid(date) ? 6 * 3600 : 8 * 3600 + 24 * 60; }
             }
         }
         
@@ -284,8 +280,7 @@ function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, mont
         
         return formatTime(totalSeconds, 'h');
     } catch (e) {
-        return "0:00:00";
-    }
+        return "0:00:00"; }
 }
 
 // ============================================================
@@ -326,15 +321,13 @@ function getNetPay(driverID, actualHours, requiredHours, rateFile) {
         let requiredSec = durationToSec(requiredHours);
         
         if (actualSec >= requiredSec) {
-            return basePay;
-        }
+            return basePay; }
         
         let missingSec = requiredSec - actualSec;
         let allowedSec = allowedMissing * 3600;
         
         if (missingSec <= allowedSec) {
-            return basePay;
-        }
+            return basePay; }
         
         let billableSec = missingSec - allowedSec;
         
@@ -344,8 +337,7 @@ function getNetPay(driverID, actualHours, requiredHours, rateFile) {
         
         return basePay - (billableHours * ratePerHour);
     } catch (e) {
-        return 0;
-    }
+        return 0; }
 }
 
 module.exports = {
