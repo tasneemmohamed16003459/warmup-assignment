@@ -45,8 +45,8 @@ function getDayOfWeek(date) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getShiftDuration(startTime, endTime) {
-    let s = toSeconds(start);
-    let e = toSeconds(end);
+    let s = toSeconds(startTime);
+    let e = toSeconds(endTime);
     if (e < s) e += 24*3600;
     return formatTime(e - s, 'h');
 }
@@ -58,8 +58,8 @@ function getShiftDuration(startTime, endTime) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getIdleTime(startTime, endTime) {
-  let s = toSeconds(start);
-    let e = toSeconds(end);
+  let s = toSeconds(startTime);
+    let e = toSeconds(endTime);
     if (e < s) e += 24*3600;
     
     let idle = 0;
@@ -83,7 +83,7 @@ function getIdleTime(startTime, endTime) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getActiveTime(shiftDuration, idleTime) {
-    let active = Math.max(0, durationToSec(shift) - durationToSec(idle));
+    let active = Math.max(0, durationToSec(shiftDuration) - durationToSec(idleTime));
     return formatTime(active, 'h');
 }
 
@@ -95,7 +95,7 @@ function getActiveTime(shiftDuration, idleTime) {
 // ============================================================
 function metQuota(date, activeTime) {
    let quota = isEid(date) ? 6*3600 : 8*3600 + 24*60;
-    return durationToSec(active) >= quota;
+    return durationToSec(activeTime) >= quota;
 }
 
 // ============================================================
@@ -105,7 +105,49 @@ function metQuota(date, activeTime) {
 // Returns: object with 10 properties or empty object {}
 // ============================================================
 function addShiftRecord(textFile, shiftObj) {
-    // TODO: Implement this function
+    try {
+        let content = fs.readFileSync(textFile, 'utf8');
+        let lines = content.trim().split('\n').filter(line => line.trim() !== '');
+        
+        for (let i = 1; i < lines.length; i++) {
+            let parts = lines[i].split(',');
+            if (parts[0] === shiftObj.driverID && parts[2] === shiftObj.date) {
+                return {}; } }
+
+        let shiftDur = getShiftDuration(shiftObj.startTime, shiftObj.endTime);
+        let idle = getIdleTime(shiftObj.startTime, shiftObj.endTime);
+        let active = getActiveTime(shiftDur, idle);
+        let quota = metQuota(shiftObj.date, active);
+        
+        let insertIdx = lines.length;
+        for (let i = lines.length - 1; i > 0; i--) {
+            if (lines[i].split(',')[0] === shiftObj.driverID) {
+                insertIdx = i + 1;
+                break; } }
+        
+        let newLine = [
+            shiftObj.driverID, shiftObj.driverName, shiftObj.date,
+            shiftObj.startTime, shiftObj.endTime, shiftDur, idle, active,
+            quota ? 'true' : 'false', 'false'].join(',');
+        
+        lines.splice(insertIdx, 0, newLine);
+        fs.writeFileSync(textFile, lines.join('\n') + (lines.length ? '\n' : ''));
+        
+        return {
+            driverID: shiftObj.driverID,
+            driverName: shiftObj.driverName,
+            date: shiftObj.date,
+            startTime: shiftObj.startTime,
+            endTime: shiftObj.endTime,
+            shiftDuration: shiftDur,
+            idleTime: idle,
+            activeTime: active,
+            metQuota: quota,
+            hasBonus: false
+        };
+    } catch (e) {
+        return {};
+    }
 }
 
 // ============================================================
