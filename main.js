@@ -159,7 +159,21 @@ function addShiftRecord(textFile, shiftObj) {
 // Returns: nothing (void)
 // ============================================================
 function setBonus(textFile, driverID, date, newValue) {
-    // TODO: Implement this function
+    try {
+        let content = fs.readFileSync(textFile, 'utf8');
+        let lines = content.split('\n');
+        
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            let parts = lines[i].split(',');
+            if (parts[0] === driverID && parts[2] === date) {
+                parts[9] = newValue.toString();
+                lines[i] = parts.join(',');
+                break; }
+        }
+        
+        fs.writeFileSync(textFile, lines.join('\n'));
+    } catch (e) {}
 }
 
 // ============================================================
