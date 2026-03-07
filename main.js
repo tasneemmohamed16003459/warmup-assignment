@@ -50,7 +50,10 @@ function getDayOfWeek(date) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getShiftDuration(startTime, endTime) {
-    // TODO: Implement this function
+    let s = toSeconds(start);
+    let e = toSeconds(end);
+    if (e < s) e += 24*3600;
+    return formatHH(e - s);
 }
 
 // ============================================================
