@@ -1,5 +1,48 @@
 const fs = require("fs");
 
+// HELPER FUNCTIONS
+
+function toSeconds(timeStr) {
+    let [time, period] = timeStr.split(' ');
+    let [h, m, s] = time.split(':').map(Number);
+    if (period === 'pm' && h !== 12) h += 12;
+    if (period === 'am' && h === 12) h = 0;
+    return h * 3600 + m * 60 + s; }
+
+function durationToSec(d) {
+    let [h, m, s] = d.split(':').map(Number);
+    return h * 3600 + m * 60 + s; }
+
+function formatTime(seconds, format = 'hh') {
+    let hours = Math.floor(seconds / 3600);
+    let mins = Math.floor((seconds % 3600) / 60);
+    let secs = seconds % 60;
+    
+    if (format === 'h') {
+        return `${hours}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    } else if (format === 'hhh') {
+        // For hhh format, we want exactly as is - with leading zeros for 3 digits
+        return `${String(hours).padStart(3,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    } else {
+        return `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    }
+}
+
+function formatHH(seconds) {
+    let hours = Math.floor(seconds / 3600);
+    let mins = Math.floor((seconds % 3600) / 60);
+    let secs = seconds % 60;
+    return `${hours}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+}
+
+function isEid(date) {
+    return date >= '2025-04-10' && date <= '2025-04-30'; }
+
+function getDayOfWeek(date) {
+    let d = new Date(date);
+    return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];
+}
+
 // ============================================================
 // Function 1: getShiftDuration(startTime, endTime)
 // startTime: (typeof string) formatted as hh:mm:ss am or hh:mm:ss pm
